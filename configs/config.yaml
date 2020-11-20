@@ -1,0 +1,18 @@
+---
+default:
+    influxdb:
+        host: influxdb
+        port: 8086
+        user: sphere_admin
+        password: sphere
+        dbname: cctx_project
+        ssl: 0
+
+devel:
+    influxdb:
+        host: 127.0.0.1
+        port: 8086
+        user: sphere_admin
+        password: sphere
+        dbname: cctx_project
+        ssl: 0
