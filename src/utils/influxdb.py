@@ -38,8 +38,10 @@ class InfluxDB:
     def measurement_exists(self, measurement):
 
         result = self.read_query('show measurements')
-
-        measurements = [m[0] for m in result.raw['series'][0]['values']]
+        if result:
+            measurements = [m[0] for m in result.raw['series'][0]['values']]
+        else:
+            return False
 
         return True if measurement in measurements else False
 
@@ -58,7 +60,7 @@ class InfluxDB:
             Datetime in string format meaning the last time available in the DB
         """
 
-        query = f"select last(value) from {measurement}"
+        query = f"SELECT * FROM {measurement} ORDER BY DESC LIMIT 1"
         raw = self.read_query(query)
         last_time = [p for p in raw.get_points()][0]['time']
         return dt.datetime.strptime(last_time, '%Y-%m-%dT%H:%M:%SZ').strftime('%Y-%m-%d %H:%M:%S')
@@ -104,7 +106,7 @@ class InfluxDB:
             result_df = pd.DataFrame({'min_timestamp': [min_time]})
         return result_df
 
-    def load_dataframe(self, df, measurement, tags='', protocol='line'):
+    def load_dataframe(self, df, measurement, tags='', tag_columns=None, protocol='line'):
         """
         Write points to InfluxDB measurement with the corresponding tags from a DataFrame
 
@@ -116,6 +118,8 @@ class InfluxDB:
             Name of the measurement to load data in
         tags:
             Tags dictionary with the corresponding keys and values
+        tag_columns:
+            List of columns to use as tags
         protocol: str
             Whether 'json' or 'line'. Default, 'line'
         """
@@ -123,7 +127,7 @@ class InfluxDB:
         client = self.dataframe_client
 
         # TODO: Add exception in case of failure
-        client.write_points(df, measurement=measurement, protocol=protocol, tags=tags)
+        client.write_points(df, measurement=measurement, protocol=protocol, tags=tags, tag_columns=tag_columns)
         n_rows = df.shape[0]
         logging.debug(f"DataFrame successfully loaded into InfluxDB. Number of rows loaded: {n_rows}")
 

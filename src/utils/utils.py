@@ -137,3 +137,5 @@ def open_yaml(path):
         except yaml.YAMLError:
             logging.error('Error when opening YAML file.', exc_info=1)
     return yaml_dict
+
+

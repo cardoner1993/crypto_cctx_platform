@@ -4,13 +4,13 @@ services:
  influxdb:
       image: influxdb:latest
       container_name: influxdb
-      ports:
-        - "8086:8086"
+      #ports:
+      #  - "8086:8086"
       user: ${CURRENT_UID}
       networks:
       - infraestructure
       volumes:
-        - ${DATA_DIR}/influxdb:/var/lib/influxdb
+      - ${DATA_DIR}/influxdb:/var/lib/influxdb
       environment:
         INFLUXDB_USER: sphere_admin
         INFLUXDB_USER_PASSWORD: sphere
@@ -19,19 +19,30 @@ services:
       image: grafana/grafana:latest
       container_name: grafana
       depends_on:
-        - influxdb
-      ports:
-        - "3000:3000"
+      - influxdb
+      #ports:
+      #  - "3000:3000"
       user: ${CURRENT_UID}
       networks:
       - infraestructure
       volumes:
-        - ${DATA_DIR}/grafana:/var/lib/grafana
+      - ${DATA_DIR}/grafana:/var/lib/grafana
       environment:
         GF_SECURITY_ADMIN_USER: sphere
         GF_SECURITY_ADMIN_PASSWORD: sphere
       restart: unless-stopped
-
+ jupyter:
+      image: jupyter/datascience-notebook
+      container_name: jupyter
+      ports:
+      - "10001:8888"
+      environment:
+        JUPYTER_ENABLE_LAB: "yes"
+      networks:
+      - infraestructure
+      volumes:
+      - ${DATA_DIR}/jupyter:/home/jobyan/work
+      restart: unless-stopped
 
 networks:
   infraestructure:
